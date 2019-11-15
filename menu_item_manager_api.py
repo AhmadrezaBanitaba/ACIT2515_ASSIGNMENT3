@@ -4,11 +4,12 @@ from drink import Drink
 from abstract_menu_item import AbstractMenuItem
 from menu_item_manager import MenuItemManager
 import json
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 
-menu_item_manager = MenuItemManager("Kashmir Dosa")
+menu_item_manager = MenuItemManager('D:/OOP/Assignment3/v1.2/test_menu.json')
 
 # This is where the API methods will go
 @app.route('/menu/menu_items', methods=['POST'])
@@ -163,7 +164,7 @@ def get_repiarstats():
     """ returns menu statistics """
     try:
         stats = menu_item_manager.get_menu_item_stats()
-        
+
         response = app.response_class(
 
             status=200,
@@ -188,74 +189,74 @@ def get_repiarstats():
 
 
 
-# @app.route('/menu_item_manager/menu_items/id', methods = ['PUT'])
-# def edit_menu_item():
-#     """ edits a  menu item given the id"""
-#     content = request.json
+@app.route('/menu/menu_items/<string:id>', methods = ['PUT'])
+def edit_menu_item():
+    """ edits a  menu item given the id"""
+    content = request.json
 
-#     try:
+    try:
 
-#         serial_number = content['serial_num']
-#         repair_cost = content['repair_cost']
-#         if repair_manager.device_exists(serial_number) is True:
-#             device = repair_manager.get_device_by_serial_num(serial_number)
-#             device.set_as_repaired(repair_cost)
-#             response = app.response_class(
-#                 status=200
-#             )
-#         else:
-#             response = app.response_class(
-#                 status=404,
-#                 response='menu item with given id does not exist'
+        serial_number = content['serial_num']
+        repair_cost = content['repair_cost']
+        if menu_item_manager.menu_exist(int(id)) is True:
+            item = menu_item_manager.get_by_id(int(id))
+            item.update()
+            response = app.response_class(
+                status=200
+            )
+        else:
+            response = app.response_class(
+                status=404,
+                response='menu item with given id does not exist'
 
-#             )
+            )
 
-#     except ValueError as e:
-#         response = app.response_class(
-#             response=str(e),
-#             status=400
-#         )
+    except ValueError as e:
+        response = app.response_class(
+            response=str(e),
+            status=400
+        )
 
-#     return response
-
-
+    return response
 
 
-# @app.route('/menu_item_manager/menu_items/id', methods=['DELETE'])
-# def remove_mobile_device(serial_number):
-#     """ deletes a menu item based on the id """
-
-#     try:
-#         if repair_manager.device_exists(serial_number) is True:
-
-#             repair_manager.remove_device_by_serial_num(serial_number)  
-
-#             response = app.response_class(
-
-#                 status=200
-#             )
-
-#         else:
-
-#             response = app.response_class(
-
-#                 status=404,
-#                 response='menu item with given id does not exist'
 
 
-#             )
+@app.route('/menu/menu_items/<string:id>', methods=['DELETE'])
+def remove_menu_item(id):
+    """ deletes a menu item based on the id """
 
-#     except ValueError as e:
+    try:
+        if menu_item_manager.menu_exist(int(id)) is True:
 
-#         response = app.response_class(
+            menu_item_manager.remove_menu_item(int(id))  
 
-#             response= str(e),
+            response = app.response_class(
 
-#             status='400'
+                status=200
+            )
 
-#         )
+        else:
 
-#     return response
+            response = app.response_class(
+
+                status=404,
+                response='menu item with given id does not exist'
+
+
+            )
+
+    except ValueError as e:
+
+        response = app.response_class(
+
+            response= str(e),
+
+            status='400'
+
+        )
+
+    return response
 
 
 
