@@ -1,0 +1,12 @@
+{
+    "menu_item_name": "curry",
+    "menu_item_no": 20,
+    "date_added":"2012-02-02",
+    "price": 2.99,
+    "calories": 156,
+    "cuisine_country": "India",
+    "main_ingredient":"chive",
+    "portion_size": "big",
+    "type": "food",
+    "is_vegetarian":true
+}
