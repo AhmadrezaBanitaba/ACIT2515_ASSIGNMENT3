@@ -23,7 +23,7 @@ def add_item():
                  content['calories'], content['cuisine_country'], content['main_ingredient'], content['portion_size'], content['is_vegetarian'])
     
             elif content['type'] == 'drink':
-                menu_item = Drink(['menu_item_name'], ['menu_item_no'], ['date_added'], ['price'], ['calories'], ['manufacturer'], ['size'], ['is_fizzy'], ['is_hot'])
+                menu_item = Drink(content['menu_item_name'], content['menu_item_no'], content['date_added'], content['price'], content['calories'], content['manufacturer'], content['size'], content['is_fizzy'], content['is_hot'])
 
 
         menu_item_manager.add_menu_item(menu_item)

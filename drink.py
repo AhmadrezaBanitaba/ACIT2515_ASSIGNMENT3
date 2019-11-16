@@ -18,7 +18,7 @@ class Drink(AbstractMenuItem):
             "id": self.get_id(),
             "menu_item_name": self._menu_item_name,
             "menu_item_no": self._menu_item_no,
-            "date_added": self._date_added.strftime("%Y-%m-%d"),
+            "date_added": self._date_added,
             "price": self._price,
             "calories": self._calories,
             "manufacturer": self._manufacturer,
