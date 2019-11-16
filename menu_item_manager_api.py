@@ -19,7 +19,7 @@ def add_item():
     try:
         for item in content:
             if content['type'] == 'food':
-                menu_item = Food(content['menu_item_name'], content['menu_item_no'], datetime.strptime(content['date_added'], '%Y-%m-%d'), content['price'],
+                menu_item = Food(content['menu_item_name'], content['menu_item_no'], (content['date_added']), content['price'],
                  content['calories'], content['cuisine_country'], content['main_ingredient'], content['portion_size'], content['is_vegetarian'])
     
             elif content['type'] == 'drink':
@@ -192,32 +192,8 @@ def get_repiarstats():
 @app.route('/menu/menu_items/<string:id>', methods = ['PUT'])
 def edit_menu_item():
     """ edits a  menu item given the id"""
-    content = request.json
-
-    try:
-
-        serial_number = content['serial_num']
-        repair_cost = content['repair_cost']
-        if menu_item_manager.menu_exist(int(id)) is True:
-            item = menu_item_manager.get_by_id(int(id))
-            item.update()
-            response = app.response_class(
-                status=200
-            )
-        else:
-            response = app.response_class(
-                status=404,
-                response='menu item with given id does not exist'
-
-            )
-
-    except ValueError as e:
-        response = app.response_class(
-            response=str(e),
-            status=400
-        )
-
-    return response
+    pass
+    
 
 
 

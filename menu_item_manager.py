@@ -3,7 +3,8 @@ from menu_item_stats import MenuItemStats
 from food import Food
 from drink import Drink
 import json
-
+from datetime import datetime 
+import os
 
 class MenuItemManager:
   
@@ -12,7 +13,8 @@ class MenuItemManager:
         self._menu = []
         self._next_available_id = int(0)
         self._filepath = filepath
-        # self._read_menu_from_file()
+        if os.path.isfile(self._filepath) and not os.stat(self._filepath).st_size == 0:
+             self._read_menu_from_file()
         if not isinstance(self._filepath, str):
             raise ValueError('filepath must be string')
 
@@ -40,6 +42,7 @@ class MenuItemManager:
             for menu_item in self._menu:
                 if menu_item.get_id() is id:
                     self._menu.remove(menu_item)
+                    self._write_menu_to_file()
 
     
 
@@ -74,6 +77,7 @@ class MenuItemManager:
             if menu_item.get_id() == id:
                 break
         self._menu[index] = menu_item
+        self._write_menu_to_file()
 
 
 
@@ -118,59 +122,46 @@ class MenuItemManager:
 
 
     
-                       
+
+    def _read_menu_from_file(self):
+        try:
+            f = open(self._filepath, 'r')
+        except:
+            f = open(self._filepath, 'w')
+            f.write('[]')
+            f.close()
+            f = open(self._filepath, 'r')
+
+        content = f.read()
+        f.close()
+        deserialize = json.loads(content)
+        
+        for i in deserialize:
+            if i['type'] == 'food':
+                menu_item = Food(i['menu_item_name'], i['menu_item_no'], i['date_added'],
+                i['price'], i['calories'], i['cuisine_country'],
+                i['main_ingredient'], i['portion_size'], i['is_vegetarian'])
+            elif i['type'] == 'drink':
+                menu_item = Drink(i['menu_item_name'], i['menu_item_no'], i['date_added'], i['price'],
+                 i['calories'], i['manufacturer'], i['size'], i['is_fizzy'], i['is_hot'])            
+            else:
+                raise Exception("type is not supported")
+            menu_item.set_id(i['id'])
+            
+            self.add_menu_item(menu_item)
+        
 
 
-    def _write_menu_to_file(self):         
+                                       
 
-        # Open the file at _filepath for writing (overwrite, not append)
-        # Create an empty temporary list
-        # For each entity in the list of entities:
-        # Convert the entity to a Python dictionary (i.e., to_dict) and add it to the temporary list
-        # Serialize the temporary list to a JSON string
-        # Write the JSON string to the file
-        # Close the file
-        f = open(self._filepath, 'w')
-        temp_list = []
+    def _write_menu_to_file(self):
+
+        menu = []
         for i in self._menu:
-            dict = i.to_dict()
-            temp_list.append(dict)
-            serializer = json.dumps(temp_list)
-            f.write(serializer)
+            menu.append(i.to_dict())
+        f = open(self._filepath, 'w')
+        serializer = json.dumps(menu)    
+        f.write(serializer)        
         f.close()    
 
 
-
-    def _read_menu_from_file(self):
-
-        # Open the file at _filepath for reading
-        # Read in the contents of the file
-        # Close the file
-        # Deserialize from a JSON string to Python primitives (a list of dictionaries, where each dictionary represents an entity)
-        # For each dictionary in the list:
-        # If the type corresponds to SpecificEntity1:
-        # Create a new instance of SpecificEntity1 using the attributes in the dictionary and add it to the entities list
-        # Else if the type corresponds to SpecificEntity2:
-        # Create a new instance of SpecificEntity2 using the attributes in the dictionary and add it to the entities list
-        # Else raise an exception because the type is not supported
-
-        f = open(self._filepath, 'r')
-        f.read()
-        f.close()
-        deserialize = json.loads(f)
-
-
-        for i in deserialize:
-            if i['type']=='food':
-                new_food = Food(i["menu_item_name"], i["menu_item_no"], i["date_added"],
-                i["price"],i["calories"],i["cuisine_country"],
-                i["main_ingredient"],i["portion_size"],i["is_vegetarian"])
-                self._menu.append(new_food)
-            elif i['type'] == 'drink':
-                new_drink = Drink(i["menu_item_name"], i["menu_item_no"], i["date_added"], i["price"], i["calories"],
-                 i["manufacturer"], i["size"], i["is_fizzy"], i["is_hot"])
-                self._menu.append(new_drink)
-            else:
-                raise Exception("type is not supported")
-                    
-                
