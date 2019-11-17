@@ -5,7 +5,6 @@ from abstract_menu_item import AbstractMenuItem
 from menu_item_manager import MenuItemManager
 import json
 import os
-from datetime import datetime
 
 app = Flask(__name__)
 
@@ -188,15 +187,36 @@ def get_repiarstats():
 
 
 
+@app.route('/menu/menu_items/<int:id>', methods = ['PUT'])
+def update_menu_item(id):
+    """ updates an existing menu item """
+    content = request.json
+    if menu_item_manager.menu_exist(id) is True:
+        try:
+            for item in content:
+                if content['type'] == 'food':
+                    menu_item = Food(content['menu_item_name'], content['menu_item_no'], (content['date_added']), content['price'],
+                    content['calories'], content['cuisine_country'], content['main_ingredient'], content['portion_size'], content['is_vegetarian'])
+                    menu_item.set_id(id)
+                    menu_item_manager.update(menu_item)
+                elif content['type'] == 'drink':
+                    menu_item = Drink(content['menu_item_name'], content['menu_item_no'], content['date_added'], content['price'], content['calories'], content['manufacturer'], content['size'], content['is_fizzy'], content['is_hot'])
+                    menu_item.set_id(id)
+                    menu_item_manager.update(menu_item)
 
-@app.route('/menu/menu_items/<string:id>', methods = ['PUT'])
-def edit_menu_item():
-    """ edits a  menu item given the id"""
-    pass
-    
+            a = menu_item_manager.get_all_by_type(content['type'])
 
+            response = app.response_class(
+                status=200,
+                mimetype='/application/json'
 
+            )
+        except ValueError as e:
+            response = app.response_class(
+                status = 404
+            )
 
+        return response
 
 @app.route('/menu/menu_items/<string:id>', methods=['DELETE'])
 def remove_menu_item(id):

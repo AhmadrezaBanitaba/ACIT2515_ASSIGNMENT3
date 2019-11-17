@@ -3,7 +3,6 @@ from menu_item_stats import MenuItemStats
 from food import Food
 from drink import Drink
 import json
-from datetime import datetime 
 import os
 
 class MenuItemManager:
@@ -30,6 +29,7 @@ class MenuItemManager:
         return str(self._next_available_id)
 
     def menu_exist(self, id):
+        """checks if item exists """
         for menu in self._menu:
             if menu.get_id() == id:
                 return True
@@ -38,6 +38,7 @@ class MenuItemManager:
 
 
     def remove_menu_item(self, id):
+        """ removes menu item if it exists """
         if self.menu_exist(id) is True:
             for menu_item in self._menu:
                 if menu_item.get_id() is id:
@@ -49,11 +50,13 @@ class MenuItemManager:
 
 
     def get_by_id(self, id):
+        """ returns menu item by id """
         for menu_item in self._menu:
             if menu_item.get_id() == id:
                 return menu_item
     
     def get_all_by_type(self, item_type):
+        """ returns all menu items by type """
         menu_list = []
         for menu_item in self._menu:
             if menu_item.get_type() == item_type:
@@ -63,6 +66,7 @@ class MenuItemManager:
         
 
     def get_all(self):
+        """ returns all items """
         menu_list = []
         for menu_item in self._menu:
                 menu_list.append(menu_item.to_dict())
@@ -70,18 +74,17 @@ class MenuItemManager:
  
 
     def update(self, menu_item):
+        """ updates menu item """
         id = menu_item.get_id()
+
         if self.menu_exist(id) is False:
             raise ValueError("id does not exist")
-        for index, menu_item in enumerate(self._menu, 0):
-            if menu_item.get_id() == id:
+        for index, menu_items in enumerate(self._menu, 0):
+            if menu_items.get_id() == id:
+                self._menu[index] = menu_item
+                self._write_menu_to_file()
                 break
-        self._menu[index] = menu_item
-        self._write_menu_to_file()
-
-
-
-
+            
     def get_menu_item_stats(self):
 
         """ gets menu item stats """
@@ -124,6 +127,7 @@ class MenuItemManager:
     
 
     def _read_menu_from_file(self):
+        """ reads from file """
         try:
             f = open(self._filepath, 'r')
         except:
@@ -155,7 +159,7 @@ class MenuItemManager:
                                        
 
     def _write_menu_to_file(self):
-
+        """ writes to file """
         menu = []
         for i in self._menu:
             menu.append(i.to_dict())

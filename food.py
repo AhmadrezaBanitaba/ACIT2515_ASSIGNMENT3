@@ -1,5 +1,4 @@
 from abstract_menu_item import AbstractMenuItem
-from datetime import datetime
 
 
 class Food(AbstractMenuItem):

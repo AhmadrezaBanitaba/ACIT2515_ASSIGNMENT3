@@ -1,4 +1,3 @@
-import datetime
 
 class AbstractMenuItem:
     """ creates menu item """ 
