@@ -31,11 +31,12 @@ def add_item():
             response= str(menu_item.get_id()), 
             status= 200
         )
-        
+
     except ValueError as e:
         response = app.response_class(
-            response=str(e),
+            response= str(e),
             status=400
+
         )
 
     return response
@@ -136,21 +137,27 @@ def get_all_menu_items():
 def get_all_by_type(type):
     """ returns menu item based on type  """
     try:
-        a =menu_item_manager.get_all_by_type(type)
+        if type=='food' or type=='drink':
+            
+            a =menu_item_manager.get_all_by_type(type)
 
-        response = app.response_class(
+            response = app.response_class(
 
-            status=200,
+                status=200,
 
-            response=json.dumps(a),
+                response=json.dumps(a),
 
-            mimetype='/application/json'
+                mimetype='/application/json'
 
-        )
-
+            )
+        else:
+            response = app.response_class(
+                status= 400,
+                response="type not supported"
+            )
     except ValueError as e:
         response = app.response_class(
-            response=str(e),
+            response= "type is not supported",
             status=400
         )
 
@@ -191,32 +198,34 @@ def get_repiarstats():
 def update_menu_item(id):
     """ updates an existing menu item """
     content = request.json
+
     if menu_item_manager.menu_exist(id) is True:
-        try:
-            for item in content:
-                if content['type'] == 'food':
-                    menu_item = Food(content['menu_item_name'], content['menu_item_no'], (content['date_added']), content['price'],
-                    content['calories'], content['cuisine_country'], content['main_ingredient'], content['portion_size'], content['is_vegetarian'])
-                    menu_item.set_id(id)
-                    menu_item_manager.update(menu_item)
-                elif content['type'] == 'drink':
-                    menu_item = Drink(content['menu_item_name'], content['menu_item_no'], content['date_added'], content['price'], content['calories'], content['manufacturer'], content['size'], content['is_fizzy'], content['is_hot'])
-                    menu_item.set_id(id)
-                    menu_item_manager.update(menu_item)
+        
+        for item in content:
+            if content['type'] == 'food':
+                menu_item = Food(content['menu_item_name'], content['menu_item_no'], (content['date_added']), content['price'],
+                content['calories'], content['cuisine_country'], content['main_ingredient'], content['portion_size'], content['is_vegetarian'])
+                menu_item.set_id(id)
+                menu_item_manager.update(menu_item)
+            elif content['type'] == 'drink':
+                menu_item = Drink(content['menu_item_name'], content['menu_item_no'], content['date_added'], content['price'], content['calories'], content['manufacturer'], content['size'], content['is_fizzy'], content['is_hot'])
+                menu_item.set_id(id)
+                menu_item_manager.update(menu_item)
 
-            a = menu_item_manager.get_all_by_type(content['type'])
+        a = menu_item_manager.get_all_by_type(content['type'])
 
-            response = app.response_class(
-                status=200,
-                mimetype='/application/json'
+        response = app.response_class(
+            status=200,
+            mimetype='/application/json'
 
-            )
-        except ValueError as e:
-            response = app.response_class(
-                status = 404
-            )
+        )
+    else:
+        response = app.response_class(
+            status= 404,
+            response= 'device with given id does not exist'
+        )
 
-        return response
+    return response
 
 @app.route('/menu/menu_items/<string:id>', methods=['DELETE'])
 def remove_menu_item(id):
@@ -233,14 +242,15 @@ def remove_menu_item(id):
             )
 
         else:
+            if menu_item_manager.menu_exist(int(id)) is False:
+                
+                response = app.response_class(
 
-            response = app.response_class(
-
-                status=404,
-                response='menu item with given id does not exist'
+                    status=404,
+                    response='menu item with given id does not exist'
 
 
-            )
+                )
 
     except ValueError as e:
 
