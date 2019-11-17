@@ -3,6 +3,7 @@ from unittest import TestCase
 import inspect
 from food import Food
 import datetime
+from menu_item_manager import MenuItemManager
 
 class Testfood(unittest.TestCase):
     """ Unit tests for food class """
@@ -12,6 +13,7 @@ class Testfood(unittest.TestCase):
         self.logPoint()
         self.barley_bread = Food("barley bread", 12, datetime.date(2018, 8, 8), 12.99, 149, "India", "Barley", "small",
                                  True)
+        self.menu_item_manager = MenuItemManager('C:/Users/user/Desktop/ACIT2515_ASSIGNMENT3-master/test_menu.json')
 
     def test_food_valid(self):
         """ 010A: Valid values for constructor """
@@ -63,10 +65,26 @@ class Testfood(unittest.TestCase):
         """100A: Checks the type of the menu"""
         self.logPoint()
         self.assertEqual(self.barley_bread.get_type(), "food", "needs to be drink")
-    
+
     def test_to_dict(self):
-        """ verifies to_dict method """
-        pass
+        """using filepath and ensure dict is working well"""
+        food_dict = self.menu_item_manager.get_all_by_type('food')
+
+        food_menu = self.menu_item_manager.get_by_id(2)
+
+        food_dict2 = food_menu.to_dict()
+
+        self.logPoint()
+
+        self.assertEqual(food_dict[0]['menu_item_name'], food_dict2['menu_item_name'], "needs to be same")
+        self.assertEqual(food_dict[0]['menu_item_no'], food_dict2['menu_item_no'], "needs to be same")
+        self.assertEqual(food_dict[0]['date_added'], food_dict2['date_added'], "needs to be same")
+        self.assertEqual(food_dict[0]['price'], food_dict2['price'], "needs to be same")
+        self.assertEqual(food_dict[0]['calories'], food_dict2['calories'], "needs to be same")
+        self.assertEqual(food_dict[0]['cuisine_country'], food_dict2['cuisine_country'], "needs to be same")
+        self.assertEqual(food_dict[0]['main_ingredient'], food_dict2['main_ingredient'], "needs to be same")
+        self.assertEqual(food_dict[0]['portion_size'], food_dict2['portion_size'], "needs to be same")
+        self.assertEqual(food_dict[0]['is_vegetarian'], food_dict2['is_vegetarian'], "needs to be same")
 
     def tearDown(self):
 

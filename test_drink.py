@@ -3,7 +3,7 @@ from unittest import TestCase
 import inspect
 from drink import Drink
 import datetime
-
+from menu_item_manager import MenuItemManager
 
 class TestDrink(unittest.TestCase):
     """ Unit tests for drink  """
@@ -12,6 +12,7 @@ class TestDrink(unittest.TestCase):
         self.logPoint()
         self.mango_lasi3 = Drink("mango lasis", 10, datetime.date(2017, 9, 12), 12.99, 80, "lasi producer ltd", 129.99,
                                  False, False)
+        self.menu_item_manager = MenuItemManager('C:/Users/user/Desktop/ACIT2515_ASSIGNMENT3-master/test_menu.json')
 
     def test_drink_valid(self):
         """ 010A: Valid values for constructor """
@@ -62,8 +63,24 @@ class TestDrink(unittest.TestCase):
         self.assertEqual(self.mango_lasi3.get_type(), "drink", "needs to be drink")
         
     def test_to_dict(self):
-        """ verifies to_dict method """
-        pass
+        """using filepath and ensure dict is working well"""
+        drink_dict = self.menu_item_manager.get_all_by_type('drink')
+
+        drink_menu = self.menu_item_manager.get_by_id(1)
+
+        drink_dict2 = drink_menu.to_dict()
+
+        self.logPoint()
+
+        self.assertEqual(drink_dict[0]['menu_item_name'],drink_dict2['menu_item_name'], "needs to be same")
+        self.assertEqual(drink_dict[0]['menu_item_no'], drink_dict2['menu_item_no'], "needs to be same")
+        self.assertEqual(drink_dict[0]['date_added'], drink_dict2['date_added'], "needs to be same")
+        self.assertEqual(drink_dict[0]['price'], drink_dict2['price'], "needs to be same")
+        self.assertEqual(drink_dict[0]['calories'], drink_dict2['calories'], "needs to be same")
+        self.assertEqual(drink_dict[0]['manufacturer'], drink_dict2['manufacturer'], "needs to be same")
+        self.assertEqual(drink_dict[0]['size'], drink_dict2['size'], "needs to be same")
+        self.assertEqual(drink_dict[0]['is_fizzy'], drink_dict2['is_fizzy'], "needs to be same")
+        self.assertEqual(drink_dict[0]['is_hot'], drink_dict2['is_hot'], "needs to be same")
 
     def tearDown(self):
         self.logPoint()
