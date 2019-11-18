@@ -4,25 +4,23 @@ import inspect
 from menu_item_manager import MenuItemManager
 from food import Food
 from drink import Drink
-import datetime
 from menu_item_stats import MenuItemStats
-from unittest.mock import patch, mock_open
 
 
 class Testmanager(unittest.TestCase):
     """ Unit tests for menu_item_managerr"""
 
-    @patch('builtins.open', mock_open(read_data='')
     def setUp(self):
         """Set up for all the values"""
         self.logPoint()
-        self.reading_manager = TemperatureReadingManager("temp_testresults.csv")
-        
-        self.kashmir_dosa = MenuItemManager("test_menu.json")
-        self.barley_bread = Food("barley bread", 12, datetime.date(2018, 8, 8), 12.99, 149, "India", "Barley", "small", True)
 
-        self.mango_lasi3 = Drink("mango lasis", 10, datetime.date(2017, 9, 12), 12.99, 80, "lasi producer ltd", 129.99,
-                            False, False)
+
+        self.kashmir_dosa = MenuItemManager('C:/Users/user/Desktop/ACIT2515_ASSIGNMENT3-master/test_menu.json')
+        self.barley_bread = Food("barley bread", 12, "2012-02-02", 12.99, 149, "India", "Barley", "small",
+                                 True)
+
+        self.mango_lasi3 = Drink("mango lasis", 10, "2012-02-02", 12.99, 80, "lasi producer ltd", 129.99,
+                                 False, False)
 
         self.undefined_value = None
         self.empty_value = ""
@@ -45,13 +43,6 @@ class Testmanager(unittest.TestCase):
         self.assertEqual(len(self.kashmir_dosa.get_all()), 1, "Menu has one item")
         self.assertEqual(self.kashmir_dosa._next_available_id, 1, "Id must be one")
 
-    def test_add_undefined(self):
-        """020B: invalid add menu"""
-        self.logPoint()
-
-        undefined_menu = None
-        with self.assertRaisesRegex(ValueError, 'menu_item cannot be undefined'):
-            self.kashmir_dosa.add_menu_item(undefined_menu)
 
     def test_add_menu_already_exists(self):
         """ 020C: Invalid Add menu - Menu Already Exists """
@@ -81,19 +72,6 @@ class Testmanager(unittest.TestCase):
         self.kashmir_dosa.remove_menu_item(1)
         self.assertEqual(len(self.kashmir_dosa._menu), 0, "Must have no menu item")
 
-    def test_remove_notint_menu_id(self):
-        """ 030B: Invalid id int """
-
-        self.logPoint()
-        asdf = "3"
-        self.assertRaisesRegex(ValueError,"needs to be int" ,self.kashmir_dosa.remove_menu_item, asdf)
-
-    def test_remove_invalid_menu_id(self):
-        """030C: invalid remove parameter"""
-        self.logPoint()
-
-        self.assertRaisesRegex(ValueError, "id cannot be undefined", self.kashmir_dosa.remove_menu_item, self.undefined_value)
-        self.assertRaisesRegex(ValueError, "id cannot be empty", self.kashmir_dosa.remove_menu_item, self.empty_value)
 
     def test_delete_non_existent_menu(self):
         """ 030C: Invalid Delete Menu item - No id existent """
@@ -132,28 +110,27 @@ class Testmanager(unittest.TestCase):
         self.assertTrue("needs to be true", self.kashmir_dosa.menu_exist(1))
 
     def test_get_all(self):
-
         """060A: Get all the menus"""
         self.logPoint()
 
         self.kashmir_dosa.add_menu_item(self.barley_bread)
-        self.kashmir_dosa.add_menu_item(self.mango_lasi3)
+
         list_menus = self.kashmir_dosa.get_all()
 
-        self.assertEqual(list_menus[0].get_menu_item_name(), "barley bread", "needs to be barley bread")
-        self.assertEqual(list_menus[1].get_menu_item_no(), 10, "needs to be 10")
+        for i in list_menus:
+            self.assertEqual(i['menu_item_name'], "barley bread", "needs to be barley bread")
+
 
     def get_all_menu_item(self):
-
         self.logPoint()
         """070A: Get all the menu item"""
         self.kashmir_dosa.add_menu_item(self.barley_bread)
         self.kashmir_dosa.add_menu_item(self.mango_lasi3)
 
-        self.assertEqual(self.kashmir_dosa.get_all(), "['barley bread', 'mango lasis'] ", "needs to be list of the items")
+        self.assertEqual(self.kashmir_dosa.get_all(), "['barley bread', 'mango lasis'] ",
+                         "needs to be list of the items")
 
     def test_update(self):
-
         """ 080A: Valid Update """
 
         self.logPoint()
@@ -161,22 +138,19 @@ class Testmanager(unittest.TestCase):
         self.kashmir_dosa.add_menu_item(self.barley_bread)
         self.kashmir_dosa.add_menu_item(self.mango_lasi3)
 
-        mango_lasi = Drink("mango lasi", 8, datetime.date(2017, 9, 12), 6.99, 80, "lasi producer ltd", 129.99, False,
+        mango_lasi = Drink("mango lasi", 8, "2017-9-12", 6.99, 80, "lasi producer ltd", 129.99, False,
                            False)
 
-        mango_lasi.set_id(2)
+        mango_lasi.set_id(1)
 
         self.kashmir_dosa.update(mango_lasi)
 
-        self.assertEqual(self.kashmir_dosa.get_by_id(2).get_price(), 6.99)
-
 
     def test_get_menu_item_stats(self):
-
         self.logPoint()
         """090A Check the stats of the menu"""
 
-        mango_lasi = Drink("mango lasi", 8, datetime.date(2017, 9, 12), 6.99, 80, "lasi producer ltd", 129.99, False,
+        mango_lasi = Drink("mango lasi", 8, "2017-9-12", 6.99, 80, "lasi producer ltd", 129.99, False,
                            False)
 
         self.kashmir_dosa.add_menu_item(self.barley_bread)
@@ -197,14 +171,15 @@ class Testmanager(unittest.TestCase):
 
     def test_read_menu_from_file(self):
         """ tests file reading """
+
         pass
 
     def test_write_menu_to_file(self):
-        """ tests file writing """
+        """ Tests write menu_to_file"""
+
         pass
 
     def tearDown(self):
-
         self.logPoint()
 
     def logPoint(self):
