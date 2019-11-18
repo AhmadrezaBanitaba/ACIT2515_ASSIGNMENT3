@@ -5,17 +5,20 @@ from menu_item_manager import MenuItemManager
 from food import Food
 from drink import Drink
 from menu_item_stats import MenuItemStats
+import os
+from unittest.mock import patch, mock_open
+
 
 
 class Testmanager(unittest.TestCase):
     """ Unit tests for menu_item_managerr"""
 
+    @patch('builtins.open', mock_open(read_data=''))
     def setUp(self):
         """Set up for all the values"""
         self.logPoint()
 
-
-        self.kashmir_dosa = MenuItemManager('C:/Users/user/Desktop/ACIT2515_ASSIGNMENT3-master/test_menu.json')
+        self.kashmir_dosa = MenuItemManager('D:/OOP/Assignment3/v1.2/test_menu1.json')
         self.barley_bread = Food("barley bread", 12, "2012-02-02", 12.99, 149, "India", "Barley", "small",
                                  True)
 
@@ -147,6 +150,7 @@ class Testmanager(unittest.TestCase):
 
 
     def test_get_menu_item_stats(self):
+
         self.logPoint()
         """090A Check the stats of the menu"""
 
@@ -165,22 +169,29 @@ class Testmanager(unittest.TestCase):
         self.assertEqual(stats.get_avg_price_food(), 12.990000)
         self.assertEqual(stats.get_avg_price_drink(), 9.990000)
 
-    def test_init(self):
+    def test_path(self):
         """  tests for parameter validation on the filepath parameter """
         pass
 
-    def test_read_menu_from_file(self):
-        """ tests file reading """
 
+    def test_read_menu_from_file(self):
+        """ Tests read menu_from_file"""
         pass
 
     def test_write_menu_to_file(self):
         """ Tests write menu_to_file"""
-
         pass
 
     def tearDown(self):
+        """ Create a test fixture after each test method is run """
+
+        try:
+            os.remove("D:/OOP/Assignment3/v1.2/test_menu1.json")
+        except:
+            pass
+
         self.logPoint()
+
 
     def logPoint(self):
         currentTest = self.id().split('.')[-1]
