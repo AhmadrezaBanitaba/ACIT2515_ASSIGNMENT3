@@ -1,90 +1,133 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from abstract_menu_item import AbstractMenuItem
 from menu_item_stats import MenuItemStats
 from food import Food
 from drink import Drink
-import json
-import os
+from datetime import datetime
+
 
 class MenuItemManager:
   
     """ creates menu item manager """    
-    def __init__(self, filepath):
-        self._menu = []
-        self._next_available_id = int(0)
-        self._filepath = filepath
-        if os.path.isfile(self._filepath) and not os.stat(self._filepath).st_size == 0:
-             self._read_menu_from_file()
-        if not isinstance(self._filepath, str):
-            raise ValueError('filepath must be string')
+    def __init__(self, restaurant_name, db_name):
 
+        self._restaurant_name = restaurant_name
+        if db_name is None or db_name == "":
+            raise ValueError("DB Name cannot be undefined")
+        engine = create_engine("sqlite:///" + db_name)
+        self._db_session = sessionmaker(bind=engine)
 
 
     def add_menu_item(self, menu_item):
         """adds a menu item to the menu list"""   
-        self._next_available_id = self._next_available_id + 1
-        if menu_item not in self._menu:
-            self._menu.append(menu_item)
-            menu_item.set_id(self._next_available_id)
-        self._write_menu_to_file()
-        return str(self._next_available_id)
+        if menu_item is None or not isinstance(menu_item, AbstractMenuItem):
+            raise ValueError("Invalid Menu Item.")
 
-    def menu_exist(self, id):
-        """checks if item exists """
-        for menu in self._menu:
-            if menu.get_id() == id:
-                return True
+        # self._next_available_id = self._next_available_id + 1
+        # menu_item.set_id(self._next_available_id)
+        
+        # if self.menu_exist(id):
+        #     raise ValueError("mene item with given id already exists.")
 
-        return False
+        session = self._db_session()        
+        session.add(menu_item)
+        session.commit()
+        session.close()
+
+
+
+
 
 
     def remove_menu_item(self, id):
         """ removes menu item if it exists """
-        if self.menu_exist(id) is True:
-            for menu_item in self._menu:
-                if menu_item.get_id() is id:
-                    self._menu.remove(menu_item)
-                    self._write_menu_to_file()
 
-    
+        if id is None or not isinstance(id, int):
+            raise ValueError("Invalid id")
+        session = self._db_session()
+
+        menu_item = session.query(AbstractMenuItem).filter(AbstractMenuItem.id == id).first()
+        if menu_item is None:
+            session.close()
+            raise ValueError("id does not exist.")
+
+        session.delete(menu_item)
+        session.commit()
+        session.close()
+
+
+
+
+
+
+    def menu_exist(self, id):
+        """checks if item exists """
+        if id is None or not isinstance(id, int):
+            raise ValueError("Invalid id.")
+        session = self._db_session()
+        menu_item = session.query(AbstractMenuItem).filter(AbstractMenuItem.id == id).first()
+        session.close()
+
+        if menu_item is not None:
+            return True
+        return False
 
 
 
     def get_by_id(self, id):
         """ returns menu item by id """
-        for menu_item in self._menu:
-            if menu_item.get_id() == id:
-                return menu_item
+        if id is None or not isinstance(id, int):
+            raise ValueError("Invalid id.")
+        
+        session = self._db_session()
+        menu_item = session.query(Food).filter(Food.id == id).first()
+
+        if menu_item is None:
+            menu_item = session.query(Drink).filter(Drink.id == id).first()
+        
+        session.close()
+
+        return menu_item
     
     def get_all_by_type(self, item_type):
-        """ returns all menu items by type """
-        menu_list = []
-        for menu_item in self._menu:
-            if menu_item.get_type() == item_type:
-                menu_list.append(menu_item.to_dict())
-        return menu_list                
+        session = self._db_session()
+        menu = session.query(AbstractMenuItem).filter(AbstractMenuItem.type == item_type).all()
 
-        
+        menu_list = []
+
+        for i in menu:
+            menu_list.append(i.menu_item_name)
+
+        return menu_list
 
     def get_all(self):
         """ returns all items """
-        menu_list = []
-        for menu_item in self._menu:
-                menu_list.append(menu_item.to_dict())
-        return menu_list                
- 
+        session = self._db_session()
+        total = 0
+        menu = session.query(AbstractMenuItem).all()
+        menu_list =[]
+        for i in menu:
+            menu_list.append(i.menu_item_name)
+
+
+        session.close()
+
+        return menu_list
+
 
     def update(self, menu_item):
         """ updates menu item """
-        id = menu_item.get_id()
 
-        if self.menu_exist(id) is False:
-            raise ValueError("id does not exist")
-        for index, menu_items in enumerate(self._menu, 0):
-            if menu_items.get_id() == id:
-                self._menu[index] = menu_item
-                self._write_menu_to_file()
-                break
-            
+        session = self._db_session()
+        update_menuitem = session.query(AbstractMenuItem).filter(AbstractMenuItem.id == menu_item.get_id()).first()
+
+        if update_menuitem is None:
+            raise ValueError("Menu item not matched")
+        else:
+
+
+
     def get_menu_item_stats(self):
 
         """ gets menu item stats """
@@ -97,27 +140,23 @@ class MenuItemManager:
         food_price_list = []
         drink_price_list = []
 
-        for menu_item in self._menu:
+        session = self._db_session()
+        menu =  session.query(AbstractMenuItem).all()
+        session.close()
+
+
+        for menu_item in menu:
             total_num_menu_items += 1
-            if menu_item.get_type() == "food":
+            if menu_item.type == "food":
                 num_foods += 1
-            if menu_item.get_type() == "drink":
-                num_drinks += 1
-
-        for menu_item in self._menu:
-            if menu_item.get_type() == "drink":
-                item_price = menu_item.get_price()
-                drink_price_list.append(item_price)
-                avg_price_drink = sum(drink_price_list)/len(drink_price_list)
-                
-
-
-
-        for menu_item in self._menu:
-            if menu_item.get_type() == "food":
-                item_price = menu_item.get_price()
+                item_price = menu_item.price
                 food_price_list.append(item_price)
-                avg_price_food = sum(food_price_list)/len(food_price_list)
+                avg_price_food = sum(food_price_list) / len(food_price_list)
+            if menu_item.type == "drink":
+                num_drinks += 1
+                item_price = menu_item.price
+                drink_price_list.append(item_price)
+                avg_price_drink = sum(drink_price_list) / len(drink_price_list)
 
         stats = MenuItemStats(total_num_menu_items,num_foods, num_drinks, avg_price_food, avg_price_drink)
 
@@ -125,47 +164,3 @@ class MenuItemManager:
 
 
     
-
-    def _read_menu_from_file(self):
-        """ reads from file """
-        try:
-            f = open(self._filepath, 'r')
-        except:
-            f = open(self._filepath, 'w')
-            f.write('[]')
-            f.close()
-            f = open(self._filepath, 'r')
-
-        content = f.read()
-        f.close()
-        deserialize = json.loads(content)
-        
-        for i in deserialize:
-            if i['type'] == 'food':
-                menu_item = Food(i['menu_item_name'], i['menu_item_no'], i['date_added'],
-                i['price'], i['calories'], i['cuisine_country'],
-                i['main_ingredient'], i['portion_size'], i['is_vegetarian'])
-            elif i['type'] == 'drink':
-                menu_item = Drink(i['menu_item_name'], i['menu_item_no'], i['date_added'], i['price'],
-                 i['calories'], i['manufacturer'], i['size'], i['is_fizzy'], i['is_hot'])            
-            else:
-                raise Exception("type is not supported")
-            menu_item.set_id(i['id'])
-            
-            self.add_menu_item(menu_item)
-        
-
-
-                                       
-
-    def _write_menu_to_file(self):
-        """ writes to file """
-        menu = []
-        for i in self._menu:
-            menu.append(i.to_dict())
-        f = open(self._filepath, 'w')
-        serializer = json.dumps(menu)    
-        f.write(serializer)        
-        f.close()    
-
-
